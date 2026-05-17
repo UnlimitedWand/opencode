@@ -9,7 +9,7 @@ import { IconButton } from "@opencode-ai/ui/icon-button"
 import { DropdownMenu } from "@opencode-ai/ui/dropdown-menu"
 import { Dialog } from "@opencode-ai/ui/dialog"
 import { InlineInput } from "@opencode-ai/ui/inline-input"
-import { Spinner } from "@opencode-ai/ui/spinner"
+
 import { SessionTurn } from "@opencode-ai/ui/session-turn"
 import { ScrollView } from "@opencode-ai/ui/scroll-view"
 import { TextField } from "@opencode-ai/ui/text-field"
@@ -721,19 +721,6 @@ export function MessageTimeline(props: {
                   "md:max-w-200 md:mx-auto 2xl:max-w-[1000px]": props.centered,
                 }}
               >
-                <Show when={workingStatus() !== "hidden" && settings.general.showSessionProgressBar()}>
-                  <div
-                    data-component="session-progress"
-                    data-state={workingStatus()}
-                    aria-hidden="true"
-                    style={{
-                      "--session-progress-color": tint() ?? "var(--icon-interactive-base)",
-                      "--session-progress-ms": `${bar.ms}ms`,
-                    }}
-                  >
-                    <div data-component="session-progress-bar" />
-                  </div>
-                </Show>
                 <div class="h-12 w-full flex items-center justify-between gap-2">
                   <div class="flex items-center gap-1 min-w-0 flex-1 pr-3">
                     <div class="flex items-center min-w-0 grow-1">
@@ -754,23 +741,6 @@ export function MessageTimeline(props: {
                           /
                         </span>
                       </Show>
-                      <div
-                        class="shrink-0 flex items-center justify-center overflow-hidden transition-[width,margin] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                        style={{
-                          width: working() ? "16px" : "0px",
-                          "margin-right": working() ? "8px" : "0px",
-                        }}
-                        aria-hidden="true"
-                      >
-                        <Show when={workingStatus() !== "hidden"}>
-                          <div
-                            class="transition-opacity duration-200 ease-out"
-                            classList={{ "opacity-0": workingStatus() === "hiding" }}
-                          >
-                            <Spinner class="size-4" style={{ color: tint() ?? "var(--icon-interactive-base)" }} />
-                          </div>
-                        </Show>
-                      </div>
                       <Show when={childTitle() || title.editing}>
                         <Show
                           when={title.editing}

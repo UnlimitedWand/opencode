@@ -550,8 +550,10 @@ export default function Page() {
   let refreshTimer: number | undefined
   let todoFrame: number | undefined
   let todoTimer: number | undefined
+  let todoInflight = false
   let diffFrame: number | undefined
   let diffTimer: number | undefined
+  let diffInflight = false
 
   createComputed((prev) => {
     const open = desktopReviewOpen()
@@ -808,16 +810,27 @@ export default function Page() {
         if (status === "idle" && !blocked) return
         const cached = untrack(() => sync.data.todo[id] !== undefined || globalSync.data.session_todo[id] !== undefined)
 
-        todoFrame = requestAnimationFrame(() => {
-          todoFrame = undefined
-          todoTimer = window.setTimeout(() => {
-            todoTimer = undefined
+        const schedule = () => {
+          if (todoFrame !== undefined || todoInflight) return
+          todoFrame = requestAnimationFrame(() => {
+            todoFrame = undefined
             if (sdk.directory !== dir || params.id !== id) return
-            untrack(() => {
-              void sync.session.todo(id, cached ? { force: true } : undefined)
-            })
-          }, 0)
-        })
+            const currentStatus = untrack(() => sync.data.session_status[id]?.type ?? "idle")
+            const currentBlocked = untrack(() => composer.blocked())
+            if (currentStatus === "idle" && !currentBlocked) return
+            todoTimer = window.setTimeout(() => {
+              todoTimer = undefined
+              todoInflight = true
+              untrack(() => {
+                void sync.session.todo(id, cached ? { force: true } : undefined).finally(() => {
+                  todoInflight = false
+                })
+              })
+            }, 0)
+          })
+        }
+
+        schedule()
       },
       { defer: true },
     ),
@@ -1283,10 +1296,14 @@ export default function Page() {
 
         diffFrame = requestAnimationFrame(() => {
           diffFrame = undefined
+          if (diffInflight) return
           diffTimer = window.setTimeout(() => {
             diffTimer = undefined
             if (sessionKey() !== key) return
-            void sync.session.diff(id, { force: true })
+            diffInflight = true
+            void sync.session.diff(id, { force: true }).finally(() => {
+              diffInflight = false
+            })
           }, 0)
         })
       },

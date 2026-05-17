@@ -97,7 +97,7 @@ const useTerminalUiBindings = (input: {
   }
 
   const handleTextareaFocus = () => {
-    input.term.options.cursorBlink = true
+    input.term.options.cursorBlink = false
   }
   const handleTextareaBlur = () => {
     input.term.options.cursorBlink = false
@@ -349,7 +349,7 @@ export const Terminal = (props: TerminalProps) => {
       const g = loaded.ghostty
 
       const t = new mod.Terminal({
-        cursorBlink: true,
+        cursorBlink: false,
         cursorStyle: "bar",
         cols: restoreSize?.cols,
         rows: restoreSize?.rows,
